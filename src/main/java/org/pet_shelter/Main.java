@@ -1,81 +1,60 @@
 package org.pet_shelter;
 
-import java.util.List;
+import org.pet_shelter.models.MenuOptions;
+import org.pet_shelter.services.AnimalService;
+import org.pet_shelter.services.PetDataService;
+
 import java.util.Scanner;
 
+import static org.pet_shelter.util.AppConstants.ANIMAL_PATH;
+
 public class Main {
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final String FILE_PATH = "src/main/resources/store/shelter_data.json";
-    private static final List<Pet> shelter = JsonStorageUtil.loadPets(FILE_PATH);
+    private final Scanner scanner;
+    private final AnimalService animalService;
+    private final PetDataService petDataService;
+
+    public Main() {
+        this.scanner = new Scanner(System.in);
+        this.petDataService = new PetDataService(ANIMAL_PATH);
+        this.animalService = new AnimalService(ANIMAL_PATH, scanner, petDataService);
+    }
 
     public static void main(String[] args) {
-        while (true) {
-            System.out.println("\nUser Menu:");
-            System.out.println("1. Add pet");
-            System.out.println("2. Show all");
-            System.out.println("3. Take pet from shelter");
-            System.out.println("4. Exit");
+        new Main().run();
+    }
+
+    public void run() {
+        boolean isRunning = true;
+
+        do {
+            printMenu();
             System.out.print("Choose an option: ");
+            String choice = scanner.next();
 
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1":
-                    addPet();
-                    break;
-                case "2":
-                    showAllPets();
-                    break;
-                case "3":
-                    takePet();
-                    break;
-                case "4":
+            MenuOptions selectedOptions = MenuOptions.fromKey(choice);
+            if (selectedOptions == null) {
+                System.out.println("Invalid option. Please try again.");
+                continue;
+            }
+
+            switch (selectedOptions) {
+                case ADD_PET -> animalService.addPet();
+                case SHOW_ALL -> animalService.showAllPets();
+                case TAKE_PET -> animalService.takePet();
+                case EXIT -> {
                     System.out.println("Exiting... Goodbye!");
-                    return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+                    isRunning = false;
+                }
             }
-        }
+        } while (isRunning);
+
+        scanner.close();
     }
 
-    private static void addPet() {
-        String name = InputValidator.getValidString("Enter pet name: ");
-        String breed = InputValidator.getValidString("Enter pet breed: ");
-        int age = InputValidator.getValidAge("Enter pet age: ");
-
-        shelter.add(new Pet(name, breed, age));
-        JsonStorageUtil.savePets(FILE_PATH, shelter);
-
-        System.out.println(name + " has been added to the shelter.");
-    }
-
-    private static void showAllPets() {
-        if (shelter.isEmpty()) {
-            System.out.println("No pets in the shelter.");
-        } else {
-            System.out.println("\nList of pets in the shelter:");
-            for (int i = 0; i < shelter.size(); i++) {
-                System.out.println((i + 1) + ". " + shelter.get(i));
-            }
-        }
-    }
-
-    private static void takePet() {
-        if (shelter.isEmpty()) {
-            System.out.println("No pets available to take.");
-            return;
-        }
-
-        showAllPets();
-        System.out.print("Enter the number of the pet to take: ");
-        int index = Integer.parseInt(scanner.nextLine()) - 1;
-
-        if (index >= 0 && index < shelter.size()) {
-            Pet removedPet = shelter.remove(index);
-            JsonStorageUtil.savePets(FILE_PATH, shelter);
-
-            System.out.println(removedPet.getName() + " has been taken from the shelter.");
-        } else {
-            System.out.println("Invalid choice. Try again.");
+    private void printMenu() {
+        System.out.println("\nUser Menu:");
+        for (MenuOptions option : MenuOptions.values()) {
+            System.out.println(option.getKey() + ". " + option.getDescription());
         }
     }
 }
