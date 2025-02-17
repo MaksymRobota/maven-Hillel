@@ -49,11 +49,12 @@ class ClientHandler {
                 out.println("Correct!");
                 out.println("You can now chat. Type 'exit' to quit.");
 
-                while (true) {
+                var isProcesing = true;
+                while (isProcesing) {
                     clientMessage = in.readLine();
                     if (clientMessage == null || "exit".equalsIgnoreCase(clientMessage.trim())) {
                         out.println("Goodbye!");
-                        break;
+                        isProcesing = false;
                     }
                     System.out.println("Client: " + clientMessage);
                     out.println(clientMessage + " - Yes, that's very interesting. =)");
@@ -97,13 +98,15 @@ class ClientApp {
                 System.out.println("Server: " + in.readLine());
             }
 
-            while (true) {
+            var isProcesing = true;
+
+            while (isProcesing) {
                 System.out.print("You: ");
                 message = scanner.nextLine();
                 if ("exit".equalsIgnoreCase(message.trim())) {
                     out.println("exit");
                     System.out.println("Server: " + in.readLine());
-                    break;
+                    isProcesing = false;
                 }
                 out.println(message);
                 System.out.println("Server: " + in.readLine());
