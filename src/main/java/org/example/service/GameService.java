@@ -9,11 +9,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class GameService {
-//    private final GameRepository gameRepository = new GameRepository();
-
     private final GameRepository gameRepository;
 
-    // Constructor that accepts a GameRepository
     public GameService(GameRepository gameRepository) {
         this.gameRepository = gameRepository;
     }
